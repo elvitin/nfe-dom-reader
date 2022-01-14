@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading XML Dataset using JavaScript</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Mukta:wght@300;400;600;700;800&family=Noto+Sans:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <table products-table>
+    <caption>NFE TOOLS</caption>
+    <thead>
+      <tr class="thead-shadow">
+        <th class="border-radius-top-left">N°</th>
+        <th>Cód. Interno (SKU)</th>
+        <th>Cód. Barras (GTIN)</th>
+        <th>Descrição</th>
+        <th>Un</th>
+        <th>Quantidade</th>
+        <th>Custo Un.</th>
+        <th>Total</th>
+        <th class="border-radius-top-right"></th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot></tfoot>
+  </table>
+
+  <form id="upload-form" action="" method="post" enctype="multipart/form-data">
+
+    
+    <input type="file" id="xml-input" accept=".xml" />
+    <label for="file" id="selector">Selecione o XML</label>
+    
+    <input id="submit-xml-button" type="submit" value="Carrregar XML">
+
+  </form>
+
+  <script src="js/script.js"></script>
+</body>
+
+</html>
