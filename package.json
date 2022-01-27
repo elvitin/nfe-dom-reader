@@ -10,6 +10,14 @@
   "author": "Victor Rodrigues",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-uglifycss": "^1.1.0",
+    "gulp-view-minify": "^0.1.4"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-clean": "^0.4.0",
+    "gulp-uglify": "^3.0.2"
   }
 }
