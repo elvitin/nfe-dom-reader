@@ -22,7 +22,7 @@ $clr-link: #2962ff; */
 /* $radius: 0.2rem; */
 
 
-img[src="https://cdn.000webhost.com/000webhost/logo/footer-powered-by-000webhost-white2.png"]{display:none;}
+/* img[src="https://cdn.000webhost.com/000webhost/logo/footer-powered-by-000webhost-white2.png"]{display:none;} */
 
 *,
 *::before,
@@ -95,19 +95,72 @@ caption {
   margin: 15px;
 }
 
-/* label {
-  padding: 16px 48px;
-  border: 3px solid #ffc872;
+#selector-xml-button {
+  background-color: #EFEFEF;
+  
+  color: #4f546c;
+  width: 30rem;
+  height: 3rem;
+  border: 3px solid #4f546c;
   border-radius: 48px;
   text-transform: uppercase;
   letter-spacing: 0.1rem;
   font-weight: 900;
-  color: #ffc872;
 }
 
-label:hover {
-  transform: scale(1.04);
-} */
+#selector-xml-button:hover {
+  transform: scale(1.01);
+  background-color: #F3FAF3;
+}
+
+#selector-xml-button:active {
+  color: white;
+  background-color: #4f546c;
+}
+
+#submit-xml-button {
+  margin-left: 3rem;
+  margin-right: 3rem;
+  width: 30rem;
+  height: 3rem;
+  border: 3px solid #4f546c;
+  border-radius: 48px;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  font-weight: 900;
+  color: #4f546c;
+}
+
+#submit-xml-button:hover {
+  transform: scale(1.01);
+  background-color: #F3FAF3;
+}
+
+#submit-xml-button:active {
+  color: white;
+  background-color: #4f546c;
+}
+
+#download-xml-button {
+  width: 30rem;
+  height: 3rem;
+  border: 3px solid #4f546c;
+  border-radius: 48px;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  font-weight: 900;
+  color: #4f546c;
+}
+
+#download-xml-button:hover {
+  transform: scale(1.01);
+  background-color: #F3FAF3;
+}
+
+#download-xml-button:active {
+  color: white;
+  background-color: #4f546c;
+}
 
 
 
@@ -128,9 +181,6 @@ label:hover {
   background-color: cadetblue;
   border-color: black; */
 }
-
-
-
 
 
 /* COPY TO CLIPBOARD STYLING LOGIC IS HERE */
@@ -183,69 +233,7 @@ label:hover {
   background-color: #b3a3a36e;
 }
 
-
-
-
-/* 
-<!-- HTML !-->
-<button class="button-19" role="button">Button 19</button> */
-
-/* CSS */
-.button-19 {
-  appearance: button;
-  background-color: #1899D6;
-  border: solid transparent;
-  border-radius: 16px;
-  border-width: 0 0 4px;
-  box-sizing: border-box;
-  color: #FFFFFF;
-  cursor: pointer;
-  display: inline-block;
-  font-family: din-round,sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: .8px;
-  line-height: 20px;
-  margin: 0;
-  outline: none;
-  overflow: visible;
-  padding: 13px 16px;
-  text-align: center;
-  text-transform: uppercase;
-  touch-action: manipulation;
-  transform: translateZ(0);
-  transition: filter .2s;
-  user-select: none;
-  -webkit-user-select: none;
-  vertical-align: middle;
-  white-space: nowrap;
-  width: 100%;
-}
-
-.button-19:after {
-  background-clip: padding-box;
-  background-color: #1CB0F6;
-  border: solid transparent;
-  border-radius: 16px;
-  border-width: 0 0 4px;
-  bottom: -4px;
-  content: "";
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: -1;
-}
-
-.button-19:main,
-.button-19:focus {
-  user-select: auto;
-}
-
-.button-19:hover:not(:disabled) {
-  filter: brightness(1.1);
-}
-
-.button-19:disabled {
-  cursor: auto;
+input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
 }
