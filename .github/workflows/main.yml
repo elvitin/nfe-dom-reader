@@ -49,11 +49,6 @@ jobs:
         run: |
           scp -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ${{ github.workspace }}/* ubuntu@${{ secrets.HOST }}:$APP_PATH
 
-      # - name: Restaurando dependências (opcional)
-      #   run: |
-      #     ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.HOST }} \
-      #     "cd $APP_PATH && npm ci"
-
       - name: Reiniciando o serviço da aplicação
         run: |
           ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.HOST }} \
