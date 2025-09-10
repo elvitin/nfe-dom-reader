@@ -1,6 +1,5 @@
 name: Publicação automática
 on:  
-  # nosso script será executado sempre quando houver push e pull request nas branches destacadas abaixo
   push:
     branches: [ "main" ]
   pull_request:
@@ -8,43 +7,57 @@ on:
 
 jobs:
   build:
-    # sistema operacional da máquina que o Github irá disponibilizar para rodar o nosso script
     runs-on: ubuntu-latest
     env:
       APP_PATH: /home/ubuntu/apps/nfe-dom-reader
       APP_SERVICE_NAME: nfeapp.service
-    # aqui é iniciado o passo a passo para realizar o processo de publicação
+      BACKUP_DIR: /home/ubuntu/backups/nfe-dom-reader
     steps:
       - uses: actions/checkout@v3
-      - name: Cria um arquivo temporário para a chave privada e altera a permissão do arquivo para que só o dono possa ler e escrever (necessário para chaves)
+
+      - name: Criar arquivo temporário da chave privada
         run: |
-            echo "${{ secrets.KEY }}" > /tmp/private_key
-            chmod 600 /tmp/private_key
-        
-        # StrictHostKeyChecking: desativar prompt 'fingerprint'
-        # UserKnownHostsFile: para não salvar a chave
-      - name: Ajustar permissões no servidor de Produção
+          echo "${{ secrets.KEY }}" > /tmp/private_key
+          chmod 600 /tmp/private_key
+
+      - name: Preparar diretórios no servidor
         run: |
           ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.HOST }} \
-          sudo mkdir -p $APP_PATH
+          "sudo mkdir -p $APP_PATH $BACKUP_DIR && sudo chown -R ubuntu:ubuntu $APP_PATH $BACKUP_DIR && sudo chmod -R 755 $APP_PATH"
 
-      - name: Ajustar permissões no servidor de Produção
+      - name: Criar backup no servidor (antes do deploy)
         run: |
-          ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.HOST }} "sudo chown -R ubuntu:ubuntu $APP_PATH && sudo chmod -R 755 $APP_PATH"
+          ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.HOST }} "
+            set -e
+            # Pula backup se diretório estiver vazio
+            if [ -d '$APP_PATH' ] && [ \"\$(ls -A '$APP_PATH' 2>/dev/null)\" ]; then
+              TS=\$(date +%Y%m%d%H%M%S)
+              FILE=\"$BACKUP_DIR/app-\$TS.tgz\"
+              # Compacta conteúdo atual
+              tar -czf \"\$FILE\" -C \"$APP_PATH\" .
+              # Guarda referência do último backup
+              echo \"\$FILE\" > \"$BACKUP_DIR/LAST_BACKUP\"
+              # Mantém só os 5 mais recentes
+              ls -1t \"$BACKUP_DIR\"/app-*.tgz 2>/dev/null | tail -n +6 | xargs -r rm -f
+              echo \"Backup criado em: \$FILE\"
+            else
+              echo 'APP_PATH vazio - sem backup (primeiro deploy?)'
+            fi
+          "
 
       - name: Transferindo os arquivos da aplicação
         run: |
           scp -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ${{ github.workspace }}/* ubuntu@${{ secrets.HOST }}:$APP_PATH
 
-      #- name: Restaurando a aplicação
-      #  run: |
-      #    ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.HOST }} \
-      #    sudo npm install --prefix $APP_PATH \
+      # - name: Restaurando dependências (opcional)
+      #   run: |
+      #     ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.HOST }} \
+      #     "cd $APP_PATH && npm ci"
 
       - name: Reiniciando o serviço da aplicação
         run: |
           ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.HOST }} \
-          sudo systemctl restart $APP_SERVICE_NAME \
+          "sudo systemctl restart $APP_SERVICE_NAME && sudo systemctl status $APP_SERVICE_NAME --no-pager -l"
 
       - name: Enviar mensagem para o Discord
         env:
@@ -52,6 +65,37 @@ jobs:
           AUTHOR: ${{ github.actor }}
         run: |
           curl -H "Content-Type: application/json" \
-                 -X POST \
-                 -d "{\"content\": \"Deploy do NfeDomReader realizado com sucesso por **${AUTHOR}**!\"}" \
-                 $DISCORD_WEBHOOK
+               -X POST \
+               -d "{\"content\": \"Deploy do NfeDomReader realizado com sucesso por **${AUTHOR}**!\"}" \
+               $DISCORD_WEBHOOK
+
+      # ============================
+      # ROLLBACK AUTOMÁTICO SE FALHAR
+      # ============================
+      - name: ⚠️ Restaurar em caso de falha (rollback)
+        if: ${{ failure() }}
+        run: |
+          echo "Falha detectada. Iniciando restauração do último backup..."
+          ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.HOST }} "
+            set -e
+            if [ -f \"$BACKUP_DIR/LAST_BACKUP\" ]; then
+              FILE=\$(cat \"$BACKUP_DIR/LAST_BACKUP\")
+              if [ -f \"\$FILE\" ]; then
+                echo \"Restaurando backup \$FILE para $APP_PATH...\"
+                # Limpa conteúdo atual e restaura
+                rm -rf \"$APP_PATH\"/*
+                tar -xzf \"\$FILE\" -C \"$APP_PATH\"
+                # Garante permissões pós-restauração
+                chown -R ubuntu:ubuntu \"$APP_PATH\"
+                chmod -R 755 \"$APP_PATH\"
+                # Reinicia serviço
+                sudo systemctl restart $APP_SERVICE_NAME
+                sudo systemctl status $APP_SERVICE_NAME --no-pager -l || true
+                echo \"Restauração concluída.\"
+              else
+                echo \"Arquivo de backup não encontrado: \$FILE\"
+              fi
+            else
+              echo 'Nenhum LAST_BACKUP encontrado. Nada a restaurar.'
+            fi
+          "
